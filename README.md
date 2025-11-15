@@ -145,7 +145,7 @@ if (rotation && Tierra) {
 ```
 Y por supuesto, para mayor flexibilidad y ya que implementé algo similar en la práctica anterior, le añadí un botón de pausa para que el usuario pueda elegir entre observar la Tierra en movimiento con los puntos o usar los `orbitControls` para mover la escena.
 
-![Botón de pausa](content\boton_pausa.gif)
+![Botón de pausa](content/boton_pausa.gif)
 
 Con respecto a las texturas, evitentemente había que añadir cierta textura para que fuese atractivo apreciar los puntos de los volcanes en el mapamundi, sin embargo, también decidí añadir el `bumpMap` de la práctica anterior para añadir cierta sensación de relieve así como una textura de espacio que se encuentra pegada en el interior de una esfera, para que fuese más inmersivo.
 
@@ -250,7 +250,7 @@ function showVolcanoInfo(data) {
   `;
 }
 ```
-![Texto de información del volcán](content\info_volcan.png)
+![Texto de información del volcán](content/info_volcan.png)
 
 Y para ocultarla:
 ```js
@@ -263,7 +263,7 @@ function hideVolcanoInfo() {
 
 Pero volviendo al evento de click, dentro de esta función hay que tener en cuenta varios factores, ya que cambiamos el color para que, cuando se haga click, el usuario sepa en qué volcán ha hecho click. Esto conlleva que, cuando se haga click en otro volcán o en un punto donde no haya un volcán, se recupere el color original.
 
-![GIF del evento click](content\click.gif)
+![GIF del evento click](content/click.gif)
 
 Además, probando con esta función de click, me di cuenta de que hay veces que, por el tamaño tan pequeño de los puntos, es un poco difícil saber si la interacción entre el ratón y el punto se está realizando o no, por lo que decidí también implementar una función `onHover` que aumenta ligeramente el tamaño de la esfera del volcán cuando pasas por encima.
 
@@ -316,7 +316,7 @@ function markerColor(lastEruption) {
 }
 ```
 
-![Puntos de distintos colores](content\puntos_colores.png)
+![Puntos de distintos colores](content/puntos_colores.png)
 
 Y por supuesto, cuando hay cualquier tipo de representación gráfica de este tipo, había que añadir una leyenda para que el usuario pudiese comprenderlo:
 ```js
@@ -336,7 +336,7 @@ function createLegend() {
 }
 ```
 
-![Imagen de la leyenda](content\legend.png)
+![Imagen de la leyenda](content/legend.png)
 
 ## Recursos
 
