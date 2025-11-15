@@ -288,7 +288,7 @@ function onHover(event) {
 
 En este caso, también hay que tener cuidado con dejar las esferas en su estado original.
 
-![GIF de como los puntos vuelven a su estado original (hover)](content\hover.gif)
+![GIF de como los puntos vuelven a su estado original (hover)](content/hover.gif)
 
 ## Color de los puntos y leyenda
 
