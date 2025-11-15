@@ -4,6 +4,10 @@
 
 - https://codesandbox.io/p/sandbox/ig-tarea-s8-entrega-3v3nf5
 
+## Link al vídeo
+
+- https://drive.google.com/file/d/1oUVA-_ZqfKkGFub29gwtQ87WhH1MXa2_/view?usp=sharing
+
 ## Introducción
 
 Para esta tarea de visualización de datos, tenía interés en representar fenómenos naturales en el globo terráqueo. Finalmente, por facilidad de representación y la disponibilidad de un dataset, me decidí a representar volcanes.
