@@ -145,6 +145,8 @@ if (rotation && Tierra) {
 ```
 Y por supuesto, para mayor flexibilidad y ya que implementé algo similar en la práctica anterior, le añadí un botón de pausa para que el usuario pueda elegir entre observar la Tierra en movimiento con los puntos o usar los `orbitControls` para mover la escena.
 
+![Botón de pausa](content\boton_pausa.gif)
+
 Con respecto a las texturas, evitentemente había que añadir cierta textura para que fuese atractivo apreciar los puntos de los volcanes en el mapamundi, sin embargo, también decidí añadir el `bumpMap` de la práctica anterior para añadir cierta sensación de relieve así como una textura de espacio que se encuentra pegada en el interior de una esfera, para que fuese más inmersivo.
 
 *Inserción de las texturas cambiando el colorSpace para que los colores originales se aprecien más.*
@@ -184,9 +186,157 @@ const starGeo = new THREE.SphereGeometry(90, 64, 64);
 ```
 ## Interacción con los puntos (eventos de ratón)
 
+Una vez obtenida la visión de la tierra y la ubicación de los volcanes, el siguiente paso era añadir alguna interacción. Me decidí por mostrar la información que consideré relevante del dataset: Nombre del volcán, el país al que pertenece, la última erupción y su ubicación (latitud y longitud).
+
+Tal y como se pudo ver anteriormente, se guarda la información en la variable `userData` del `marker` al crearlo:
+```js
+marker.userData = {
+  nombre: columna[indices.nombre],
+  pais: columna[indices.pais],
+  ultimaErupcion: columna[indices.ultimaErupcion],
+  lat,
+  lon
+};
+```
+
+Posteriormente, creamos un evento de ratón para que, al hacer click, se muestren los datos del volcán en la pantalla:
+```js
+window.addEventListener("click", onClick, false);
+function onClick(event) {
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, camera);
+
+    const intersects = raycaster.intersectObjects(Tierra.children, true);
+
+    if (intersects.length > 0) {
+      const marker = intersects[0].object;
+      if (marker.userData) {
+        showVolcanoInfo(marker.userData);
+
+        if (selectedMarker) {
+          let color = markerColor(selectedMarker.userData.ultimaErupcion);
+          selectedMarker.material.color.set(color);
+          selectedMarker.material.emissive.set(color);
+        }
+        
+        marker.material.color.set(0xffff00);
+        marker.material.emissive.set(0xffff00);
+        selectedMarker = marker;
+      }
+    } else {
+      if (selectedMarker) {
+        let color = markerColor(selectedMarker.userData.ultimaErupcion);
+        selectedMarker.material.color.set(color);
+        selectedMarker.material.emissive.set(color);
+        selectedMarker.scale.set(1, 1, 1)
+        hideVolcanoInfo();
+      }
+    }
+  }
+```
+Obviamente, necesitábamos una función para añadir el texto a la pantalla:
+```js
+function showVolcanoInfo(data) {
+  info.classList.remove("info");
+  info.classList.add("volcano-info");
+  info.innerHTML = `
+    <strong>${data.nombre}</strong><br>
+    Country: ${data.pais}<br>
+    Last Eruption: ${data.ultimaErupcion}<br>
+    Latitude: ${data.lat}<br>
+    Longitude: ${data.lon}
+  `;
+}
+```
+![Texto de información del volcán](content\info_volcan.png)
+
+Y para ocultarla:
+```js
+function hideVolcanoInfo() {
+  info.classList.remove("volcano-info");
+  info.classList.add("info");
+  info.innerHTML = "Práctica S8 - Leslie Romero";
+}
+```
+
+Pero volviendo al evento de click, dentro de esta función hay que tener en cuenta varios factores, ya que cambiamos el color para que, cuando se haga click, el usuario sepa en qué volcán ha hecho click. Esto conlleva que, cuando se haga click en otro volcán o en un punto donde no haya un volcán, se recupere el color original.
+
+![GIF del evento click](content\click.gif)
+
+Además, probando con esta función de click, me di cuenta de que hay veces que, por el tamaño tan pequeño de los puntos, es un poco difícil saber si la interacción entre el ratón y el punto se está realizando o no, por lo que decidí también implementar una función `onHover` que aumenta ligeramente el tamaño de la esfera del volcán cuando pasas por encima.
+
+```js
+function onHover(event) {
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+  
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(Tierra.children, true);
+  
+    Tierra.children.forEach(marker => {
+      if (marker !== selectedMarker) marker.scale.set(1, 1, 1);
+    });
+  
+    if (intersects.length > 0) {
+      const marker = intersects[0].object;
+      if (marker !== selectedMarker) marker.scale.set(1.2, 1.2, 1.2);
+    }
+  }
+```
+
+En este caso, también hay que tener cuidado con dejar las esferas en su estado original.
+
+![GIF de como los puntos vuelven a su estado original (hover)](content\hover.gif)
 
 ## Color de los puntos y leyenda
 
+Una vez estaban implementados los eventos de ratón, me pareció lo más adecuado añadir algún tipo de distinción entre los puntos. Ya que teníamos el dato de la última erupción, elegí filtrar por cuántos años hacía que había erupcionado por última vez cada volcán y asignarle un color. Esto complicó ligeramente la lógica de otras funciones que utilizaban el color, como los eventos de ratón, por lo que facilité los cálculos con una función:
+
+```js
+function markerColor(lastEruption) {
+  if (lastEruption.includes("Unknown")) {
+    return 0x1C0333;
+  }
+
+  let year = parseInt(lastEruption);
+
+  if (lastEruption.includes("BCE")) {
+      year += 2025
+  }
+
+  let yearsPassed = 2025 - year;
+
+  if (yearsPassed <= 100) return 0xff0000;
+  if (yearsPassed <= 1000) return 0xCC5500;
+  if (yearsPassed <= 10000) return 0x770737;
+  return 0x1C0333;
+  
+}
+```
+
+![Puntos de distintos colores](content\puntos_colores.png)
+
+Y por supuesto, cuando hay cualquier tipo de representación gráfica de este tipo, había que añadir una leyenda para que el usuario pudiese comprenderlo:
+```js
+function createLegend() {
+  const legend = document.createElement("div");
+  legend.id = "legend-box";
+
+  legend.innerHTML = `
+      <strong style="font-size: 14px;">Eruption recency</strong><br>
+      <div class="color-item"><span class="color-dot" style="background:#ff0000"></span> Recent (1900–Now)</div>
+      <div class="color-item"><span class="color-dot" style="background:#cc5500"></span> Medium (0–1900 CE)</div>
+      <div class="color-item"><span class="color-dot" style="background:#770737"></span> Old (1000 BCE–0)</div>
+      <div class="color-item"><span class="color-dot" style="background:#1c0333"></span> Ancient / Unknown</div>
+  `;
+
+  document.body.appendChild(legend);
+}
+```
+
+![Imagen de la leyenda](content\legend.png)
 
 ## Recursos
 
